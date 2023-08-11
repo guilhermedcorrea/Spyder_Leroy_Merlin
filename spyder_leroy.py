@@ -6,14 +6,24 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
+from typing import Any
 
-def random_delay():
+import sys
+try:
+
+    sys.path.append(r'D:\app_scraping')
+except:
+    pass
+
+from models.tables import insert_or_update_products
+
+def random_delay() -> float:
     return random.uniform(0.5, 3.0)
 
-def random_sleep():
+def random_sleep() -> int:
     return random.randint(4, 15)
 
-def retry_on_error(func, max_attempts, wait_time=10):
+def retry_on_error(func: Any, max_attempts: Any, wait_time=10):
     attempts = 0
     while attempts < max_attempts:
         try:
@@ -30,7 +40,7 @@ def retry_on_error(func, max_attempts, wait_time=10):
                 print("Não foi possível concluir a tarefa após várias tentativas.")
                 break
 
-def click_last_page_button(driver):
+def click_last_page_button(driver: Any) -> (int | None):
     try:
         button = driver.find_element(By.XPATH, "/html/body/div[7]/div[4]/div[1]/div[2]/div[4]/nav/button[2]/i")
         button.click()
@@ -45,7 +55,7 @@ def click_last_page_button(driver):
         print("Erro ao clicar no botão da última página:", e)
         return None
 
-def click_and_get_urls(driver):
+def click_and_get_urls(driver: Any) -> (list[Any] | list):
     try:
         urls_products = driver.find_elements(By.XPATH, "/html/body/div/div/div/div/div/div/div/div/div/div/a")
         return [urls.get_attribute("href") for urls in urls_products]
@@ -53,7 +63,7 @@ def click_and_get_urls(driver):
         print("Erro ao obter URLs:", e)
         return []
 
-def extract_page_number_from_url(url):
+def extract_page_number_from_url(url: Any) ->  (int | None):
     try:
         page_number = int(url.split("page=")[-1])
         return page_number
@@ -61,7 +71,7 @@ def extract_page_number_from_url(url):
         print("Erro ao extrair número da página da URL:", e)
         return None
 
-def extract_start_page_number(url):
+def extract_start_page_number(url: Any) ->  (int | None):
     try:
         start_page_number = int(url.split("page=")[-1])
         return start_page_number
@@ -80,41 +90,67 @@ def scroll() -> None:
         if lastCount == lenOfPage:
             match = True
 
-def make_request(driver, url):
+def make_request(driver: Any, url: Any) -> None:
     driver.execute_cdp_cmd("Network.setUserAgentOverride", {"userAgent": random.choice(user_agents)})
     time.sleep(random_delay())
     driver.get(url)
     time.sleep(random_delay())
     scroll()
 
-def extract_product_details(driver):
+def extract_product_details(driver: Any) -> dict:
     
     driver.implicitly_wait(30)
+    product_dict = {}
     
     try:
         nome = driver.find_elements(By.XPATH,"/html/body/div[10]/div/div[1]/div[1]/div/div[1]/h1")[0].text
-        print(nome)
+        product_dict["nome"] = nome
     except:
-        print("Error nome produto")
-        
-    try:
-        preco = driver.find_elements(By.XPATH,"/html/body/div[10]/div/div[1]/div[2]/div[2]/div/div[1]/div/div[2]/div[2]/div/span[1]")[0].text
-        print(preco)
-    except:
-        print("error preco produto")
-        
-        
-    try:
-        imagens = driver.find_elements(By.XPATH,"/html/body/div[10]/div/div[1]/div[2]/div[1]/div[1]/div[1]/div[3]/div/div[1]/div[2]/div/div/div/div/div/img")
-        cont = 0
-        for imagem in imagens:
-            print(imagem[cont].get_attribute("src"))
-            
-        cont+=1
-    except:
-        print("errror imagem")
-        
+        pass
     
+   
+    try:
+        precos = driver.find_elements(By.XPATH,"/html/body/div[10]/div/div[1]/div[2]/div[2]/div/div[1]/div/div[2]/div[2]/div/span[1]")[0].text
+        product_dict["precos"] = float(precos.replace("R$","").replace(",","").replace(",",".").strip())
+        
+    except:
+        pass
+
+    try:
+        preco_detalhes = driver.find_elements(
+            By.XPATH,"/html/body/div[10]/div/div[1]/div[2]/div[2]/div/div[1]/div/div[3]/div/strong")[0].text
+        product_dict["detalhespreco"] = preco_detalhes
+        
+    except:
+        pass
+    try:
+        descricao = driver.find_elements(
+            By.XPATH,"/html/body/div[10]/div/div[1]/div[2]/div[1]/div[2]/div/div[2]/div/div/div/p")[0].text
+        product_dict["descricao"] = descricao
+    except:
+        pass
+
+    imagens = driver.find_elements(
+        By.XPATH,"//div[@class='css-17kvx2v-wrapper__image-wrapper ejgu7z2']//img")
+    cont = 0
+    for imagem in imagens:
+        product_dict["imagem"+str(cont)] = imagem.get_attribute(
+            "src").replace("140x140.jpg","600x600.jpg").replace("140x140.jpeg","600x600.jpeg")
+        cont+=1
+    
+    
+    referencias = driver.find_elements(
+        By.XPATH,"/html/body/div[10]/div/div[4]/div[2]/table/tbody/tr/th")
+    atributos = driver.find_elements(
+        By.XPATH,"/html/body/div[10]/div/div[4]/div[2]/table/tbody/tr/td")
+    cont = 0
+    for referencia in referencias:
+        product_dict[referencia.text] = atributos[cont].text
+        cont+=1
+
+    return product_dict
+   
+
 if __name__ == "__main__":
     options = webdriver.ChromeOptions()
     options.add_argument("--no-sandbox")
@@ -150,7 +186,7 @@ if __name__ == "__main__":
 
         time.sleep(5)
 
-        def click_last_page_button(driver):
+        def click_last_page_button(driver: Any) -> (int | None):
             try:
                 button = driver.find_element(By.XPATH, "/html/body/div[7]/div[4]/div[1]/div[2]/div[4]/nav/button[2]/i")
                 button.click()
@@ -184,12 +220,18 @@ if __name__ == "__main__":
 
         for url in all_urls:
             make_request(driver, url)
-            product = extract_product_details(driver)  
+            product = extract_product_details(driver)
+            
+            insert_or_update_products(nome=product['nome'],detalhespreco=product['detalhespreco']
+                                      ,descricao=product['descricao'],precos=product['precos'])
+            
+            
             products.append(product)
 
         print("Detalhes dos produtos:")
         for product in products:
-            print(product)
+            ...
+            
 
     finally:
         driver.quit()
