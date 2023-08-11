@@ -98,16 +98,18 @@ def extract_product_details(driver):
         print("Error nome produto")
         
     try:
-        preco = driver.find_elements(By.XPATH,"/html/body/div[10]/div/div[1]/div[2]/div[2]/div/div[1]/div/div[3]/div[1]/div/p")[0].text
+        preco = driver.find_elements(By.XPATH,"/html/body/div[10]/div/div[1]/div[2]/div[2]/div/div[1]/div/div[2]/div[2]/div/span[1]")[0].text
         print(preco)
     except:
         print("error preco produto")
+        
         
     try:
         imagens = driver.find_elements(By.XPATH,"/html/body/div[10]/div/div[1]/div[2]/div[1]/div[1]/div[1]/div[3]/div/div[1]/div[2]/div/div/div/div/div/img")
         cont = 0
         for imagem in imagens:
             print(imagem[cont].get_attribute("src"))
+            
         cont+=1
     except:
         print("errror imagem")
