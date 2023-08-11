@@ -36,7 +36,6 @@ def click_last_page_button(driver):
         button.click()
         WebDriverWait(driver, 10).until(EC.staleness_of(button))
 
-        # Extract the last page number from the URL
         last_page_url = driver.current_url
         last_page_number = int(last_page_url.split("page=")[-1])
 
@@ -113,12 +112,6 @@ def extract_product_details(driver):
     except:
         print("errror imagem")
         
-    
-        
-        
-    
-    
-    
     
 if __name__ == "__main__":
     options = webdriver.ChromeOptions()
