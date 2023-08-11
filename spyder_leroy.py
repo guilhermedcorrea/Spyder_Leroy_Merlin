@@ -88,7 +88,17 @@ def make_request(driver, url):
     time.sleep(random_delay())
     scroll()
 
-
+def extract_product_details(driver):
+    
+    driver.implicitly_wait(30)
+    
+    try:
+        nome = driver.find_elements(By.XPATH,"/html/body/div[10]/div/div[1]/div[1]/div/div[1]/h1")[0].text
+        print(nome)
+    except:
+        print("Error")
+    
+    
 
 if __name__ == "__main__":
     options = webdriver.ChromeOptions()
@@ -114,7 +124,6 @@ if __name__ == "__main__":
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.81 Safari/537.36",
         "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:92.0) Gecko/20100101 Firefox/92.0"
     ]
-    
     try:
         driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
         driver.implicitly_wait(10)
@@ -131,8 +140,7 @@ if __name__ == "__main__":
                 button = driver.find_element(By.XPATH, "/html/body/div[7]/div[4]/div[1]/div[2]/div[4]/nav/button[2]/i")
                 button.click()
                 WebDriverWait(driver, 10).until(EC.staleness_of(button))
-                
-                # Extract the last page number from the URL
+               
                 last_page_url = driver.current_url
                 last_page_number = int(last_page_url.split("page=")[-1])
 
@@ -156,6 +164,17 @@ if __name__ == "__main__":
         print("URLs coletadas:")
         for url in all_urls:
             print(url)
+
+        products = []
+
+        for url in all_urls:
+            make_request(driver, url)
+            product = extract_product_details(driver)  
+            products.append(product)
+
+        print("Detalhes dos produtos:")
+        for product in products:
+            print(product)
 
     finally:
         driver.quit()
